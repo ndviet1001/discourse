@@ -407,7 +407,6 @@ describe Email::Sender do
     context "when secure media enabled" do
       def enable_s3_uploads
         setup_s3
-        stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
         stub_request(
           :put,
           "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{image.sha1}.#{image.extension}?acl"

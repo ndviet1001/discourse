@@ -303,7 +303,6 @@ RSpec.describe "tasks/uploads" do
 
   def enable_s3_uploads(uploads)
     setup_s3
-    stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
 
     uploads.each do |upload|
       stub_request(

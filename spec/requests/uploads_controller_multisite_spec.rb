@@ -11,7 +11,6 @@ describe UploadsController do
 
       before do
         setup_s3
-        stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
       end
 
       context "when upload is secure and secure media enabled" do

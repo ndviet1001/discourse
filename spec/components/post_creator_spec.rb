@@ -1595,8 +1595,6 @@ describe PostCreator do
       SiteSetting.authorized_extensions = "png|jpg|gif|mp4"
       SiteSetting.secure_media = true
 
-      stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
-
       stub_request(
         :put,
         "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{image_upload.sha1}.#{image_upload.extension}?acl"

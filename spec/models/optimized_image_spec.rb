@@ -314,7 +314,6 @@ describe OptimizedImage do
           before do
             stub_request(:head, "http://#{s3_upload.url}").to_return(status: 200)
             stub_request(:get, "http://#{s3_upload.url}").to_return(status: 200, body: file_from_fixtures("logo.png"))
-            stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
             stub_request(:put, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com#{optimized_path}")
               .to_return(status: 200, headers: { "ETag" => "someetag" })
           end

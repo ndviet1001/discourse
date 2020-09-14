@@ -19,5 +19,7 @@ module SiteSettingsHelpers
 
     SiteSetting.s3_access_key_id = "some key"
     SiteSetting.s3_secret_access_key = "some secrets3_region key"
+
+    stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
   end
 end

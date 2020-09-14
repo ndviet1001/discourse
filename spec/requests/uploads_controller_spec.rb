@@ -394,7 +394,6 @@ describe UploadsController do
         before do
           SiteSetting.secure_media = true
           upload.update(secure: true)
-          stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
         end
 
         it "redirects to the signed_url_for_path" do
@@ -444,15 +443,6 @@ describe UploadsController do
       let(:upload) { Fabricate(:upload_s3) }
       let(:secure_url) { upload.url.sub(SiteSetting.Upload.absolute_base_url, "/secure-media-uploads") }
 
-      def sign_in_and_stub_head
-        sign_in(user)
-        stub_head
-      end
-
-      def stub_head
-        stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
-      end
-
       before do
         setup_s3
         SiteSetting.authorized_extensions = "*"
@@ -465,8 +455,7 @@ describe UploadsController do
       end
 
       it "should return signed url for legitimate request" do
-        sign_in_and_stub_head
-
+        sign_in(user)
         get secure_url
 
         expect(response.status).to eq(302)
@@ -486,7 +475,7 @@ describe UploadsController do
 
       context "when the upload cannot be found from the URL" do
         it "returns a 404" do
-          sign_in_and_stub_head
+          sign_in(user)
           upload.update(sha1: 'test')
 
           get secure_url
@@ -499,13 +488,13 @@ describe UploadsController do
         let!(:private_category) { Fabricate(:private_category, group: Fabricate(:group)) }
 
         before do
-          sign_in_and_stub_head
+          sign_in(user)
           upload.update(access_control_post_id: post.id)
         end
 
         context "when the user has access to the post via guardian" do
           it "should return signed url for legitimate request" do
-            sign_in_and_stub_head
+            sign_in(user)
             get secure_url
             expect(response.status).to eq(302)
             expect(response.redirect_url).to match("Amz-Expires")
@@ -518,7 +507,7 @@ describe UploadsController do
           end
 
           it "returns a 403" do
-            sign_in_and_stub_head
+            sign_in(user)
             get secure_url
             expect(response.status).to eq(403)
           end
@@ -530,7 +519,7 @@ describe UploadsController do
           upload.update(original_filename: 'test.pdf')
         end
         it "redirects to the signed_url_for_path" do
-          sign_in_and_stub_head
+          sign_in(user)
           get secure_url
           expect(response.status).to eq(302)
           expect(response.redirect_url).to match("Amz-Expires")
@@ -546,7 +535,7 @@ describe UploadsController do
           end
 
           it "returns a 403" do
-            sign_in_and_stub_head
+            sign_in(user)
             get secure_url
             expect(response.status).to eq(403)
           end
@@ -556,8 +545,8 @@ describe UploadsController do
           before do
             SiteSetting.prevent_anons_from_downloading_files = true
           end
+
           it "returns a 404" do
-            stub_head
             delete "/session/#{user.username}.json"
             get secure_url
             expect(response.status).to eq(404)
@@ -578,8 +567,6 @@ describe UploadsController do
           it "should redirect to the regular show route" do
             secure_url = upload.url.sub(SiteSetting.Upload.absolute_base_url, "/secure-media-uploads")
             sign_in(user)
-            stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
-
             get secure_url
 
             expect(response.status).to eq(302)
@@ -595,8 +582,6 @@ describe UploadsController do
           it "should redirect to the presigned URL still otherwise we will get a 403" do
             secure_url = upload.url.sub(SiteSetting.Upload.absolute_base_url, "/secure-media-uploads")
             sign_in(user)
-            stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
-
             get secure_url
 
             expect(response.status).to eq(302)

@@ -159,8 +159,6 @@ describe TopicUploadSecurityManager do
     setup_s3
     SiteSetting.secure_media = true
 
-    stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
-
     # because the ACLs will be changing...
     [upload, upload2, upload3].each do |upl|
       stub_request(

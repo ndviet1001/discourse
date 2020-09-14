@@ -506,13 +506,10 @@ describe Jobs::PullHotlinkedImages do
   end
 
   def stub_s3(upload)
-    stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
-
     stub_request(
       :put,
       "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/original/1X/#{upload.sha1}.#{upload.extension}?acl"
     )
     stub_request(:get, "https:" + upload.url).to_return(status: 200, body: file_from_fixtures("smallest.png"))
-    # stub_request(:get, /#{SiteSetting.s3_upload_bucket}\.s3\.amazonaws\.com/)
   end
 end
