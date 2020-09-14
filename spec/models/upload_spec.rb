@@ -399,11 +399,7 @@ describe Upload do
   def enable_secure_media
     setup_s3
     SiteSetting.secure_media = true
-
-    stub_request(
-      :put,
-      "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{upload.sha1}.#{upload.extension}?acl"
-    )
+    stub_upload(upload)
   end
 
   context '.destroy' do

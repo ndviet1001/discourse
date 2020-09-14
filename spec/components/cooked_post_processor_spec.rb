@@ -481,10 +481,7 @@ describe CookedPostProcessor do
             stored_path = Discourse.store.get_path_for_upload(upload)
             upload.update_column(:url, "#{SiteSetting.Upload.absolute_base_url}/#{stored_path}")
 
-            stub_request(
-              :put,
-              "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/optimized/1X/#{upload.sha1}_2_#{optimized_size}.#{upload.extension}"
-            )
+            stub_upload(upload)
 
             SiteSetting.login_required = true
             SiteSetting.secure_media = true

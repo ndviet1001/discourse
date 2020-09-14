@@ -1478,14 +1478,8 @@ describe Post do
 
         attachment_upload.update!(original_filename: "hello.csv")
 
-        stub_request(
-          :put,
-          "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{attachment_upload.sha1}.#{attachment_upload.extension}?acl"
-        )
-        stub_request(
-          :put,
-          "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{image_upload.sha1}.#{image_upload.extension}?acl"
-        )
+        stub_upload(attachment_upload)
+        stub_upload(image_upload)
       end
 
       it "marks image and attachment uploads as secure in PMs when secure_media is ON" do
