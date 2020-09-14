@@ -406,14 +406,11 @@ describe Email::Sender do
 
     context "when secure media enabled" do
       def enable_s3_uploads
-        SiteSetting.enable_s3_uploads = true
-        SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-        SiteSetting.s3_access_key_id = "some key"
-        SiteSetting.s3_secret_access_key = "some secrets3_region key"
-        stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
+        setup_s3
+        stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
         stub_request(
           :put,
-          "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/original/1X/#{image.sha1}.#{image.extension}?acl"
+          "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{image.sha1}.#{image.extension}?acl"
         )
         store = FileStore::S3Store.new
         s3_helper = store.instance_variable_get(:@s3_helper)

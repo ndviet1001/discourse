@@ -156,19 +156,16 @@ describe TopicUploadSecurityManager do
   end
 
   def enable_secure_media
-    SiteSetting.enable_s3_uploads = true
-    SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-    SiteSetting.s3_access_key_id = "some key"
-    SiteSetting.s3_secret_access_key = "some secrets3_region key"
+    setup_s3
     SiteSetting.secure_media = true
 
-    stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
+    stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
 
     # because the ACLs will be changing...
     [upload, upload2, upload3].each do |upl|
       stub_request(
         :put,
-        "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/original/1X/#{upl.sha1}.#{upl.extension}?acl"
+        "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{upl.sha1}.#{upl.extension}?acl"
       )
     end
   end

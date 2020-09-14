@@ -1591,19 +1591,15 @@ describe PostCreator do
     fab!(:public_topic) { Fabricate(:topic) }
 
     before do
-      SiteSetting.enable_s3_uploads = true
+      setup_s3
       SiteSetting.authorized_extensions = "png|jpg|gif|mp4"
-      SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-      SiteSetting.s3_access_key_id = "some key"
-      SiteSetting.s3_secret_access_key = "some secret key"
-      SiteSetting.s3_region = "us-east-1"
       SiteSetting.secure_media = true
 
-      stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
+      stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
 
       stub_request(
         :put,
-        "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/original/1X/#{image_upload.sha1}.#{image_upload.extension}?acl"
+        "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{image_upload.sha1}.#{image_upload.extension}?acl"
       )
     end
 

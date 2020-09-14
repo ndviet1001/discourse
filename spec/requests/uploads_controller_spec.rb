@@ -240,9 +240,7 @@ describe UploadsController do
       fab!(:upload) { upload_file("small.pdf", "pdf") }
 
       before do
-        SiteSetting.enable_s3_uploads = true
-        SiteSetting.s3_access_key_id = "fakeid7974664"
-        SiteSetting.s3_secret_access_key = "fakesecretid7974664"
+        setup_s3
       end
 
       it "returns 404 " do
@@ -383,9 +381,7 @@ describe UploadsController do
       let(:upload) { Fabricate(:upload_s3) }
 
       before do
-        SiteSetting.enable_s3_uploads = true
-        SiteSetting.s3_access_key_id = "fakeid7974664"
-        SiteSetting.s3_secret_access_key = "fakesecretid7974664"
+        setup_s3
       end
 
       it "should redirect to the s3 URL" do
@@ -398,7 +394,7 @@ describe UploadsController do
         before do
           SiteSetting.secure_media = true
           upload.update(secure: true)
-          stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
+          stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
         end
 
         it "redirects to the signed_url_for_path" do
@@ -454,16 +450,12 @@ describe UploadsController do
       end
 
       def stub_head
-        stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
+        stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
       end
 
       before do
+        setup_s3
         SiteSetting.authorized_extensions = "*"
-        SiteSetting.enable_s3_uploads = true
-        SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-        SiteSetting.s3_access_key_id = "fakeid7974664"
-        SiteSetting.s3_secret_access_key = "fakesecretid7974664"
-        SiteSetting.s3_region = "us-east-1"
         SiteSetting.secure_media = true
       end
 
@@ -586,7 +578,7 @@ describe UploadsController do
           it "should redirect to the regular show route" do
             secure_url = upload.url.sub(SiteSetting.Upload.absolute_base_url, "/secure-media-uploads")
             sign_in(user)
-            stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
+            stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
 
             get secure_url
 
@@ -603,7 +595,7 @@ describe UploadsController do
           it "should redirect to the presigned URL still otherwise we will get a 403" do
             secure_url = upload.url.sub(SiteSetting.Upload.absolute_base_url, "/secure-media-uploads")
             sign_in(user)
-            stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
+            stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
 
             get secure_url
 
@@ -632,11 +624,8 @@ describe UploadsController do
       let(:upload) { Fabricate(:upload_s3, secure: true) }
 
       before do
+        setup_s3
         SiteSetting.authorized_extensions = "pdf|png"
-        SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-        SiteSetting.s3_access_key_id = "s3-access-key-id"
-        SiteSetting.s3_secret_access_key = "s3-secret-access-key"
-        SiteSetting.enable_s3_uploads = true
         SiteSetting.secure_media = true
       end
 

@@ -415,12 +415,9 @@ describe Jobs::PullHotlinkedImages do
     end
 
     it "returns false for emoji when app and S3 CDNs configured" do
-      set_cdn_url "https://mydomain.cdn/test"
-      SiteSetting.s3_upload_bucket = "some-bucket-on-s3"
-      SiteSetting.s3_access_key_id = "s3-access-key-id"
-      SiteSetting.s3_secret_access_key = "s3-secret-access-key"
+      setup_s3
       SiteSetting.s3_cdn_url = "https://s3.cdn.com"
-      SiteSetting.enable_s3_uploads = true
+      set_cdn_url "https://mydomain.cdn/test"
 
       src = UrlHelper.cook_url(Emoji.url_for("testemoji.png"))
       expect(subject.should_download_image?(src)).to eq(false)
@@ -504,10 +501,7 @@ describe Jobs::PullHotlinkedImages do
   end
 
   def enable_secure_media
-    SiteSetting.enable_s3_uploads = true
-    SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-    SiteSetting.s3_access_key_id = "some key"
-    SiteSetting.s3_secret_access_key = "some secrets3_region key"
+    setup_s3
     SiteSetting.secure_media = true
   end
 

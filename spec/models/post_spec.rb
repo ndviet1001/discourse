@@ -1467,15 +1467,15 @@ describe Post do
         enable_secure_media_and_s3
         attachment_upload.update!(original_filename: "hello.csv")
 
-        stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
+        stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
 
         stub_request(
           :put,
-          "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/original/1X/#{attachment_upload.sha1}.#{attachment_upload.extension}?acl"
+          "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{attachment_upload.sha1}.#{attachment_upload.extension}?acl"
         )
         stub_request(
           :put,
-          "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/original/1X/#{image_upload.sha1}.#{image_upload.extension}?acl"
+          "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{image_upload.sha1}.#{image_upload.extension}?acl"
         )
       end
 
@@ -1690,11 +1690,7 @@ describe Post do
     end
 
     it "should skip external urls with upload url in query string" do
-      SiteSetting.enable_s3_uploads = true
-      SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-      SiteSetting.s3_access_key_id = "some key"
-      SiteSetting.s3_secret_access_key = "some secret key"
-      SiteSetting.s3_cdn_url = "https://cdn.s3.amazonaws.com"
+      setup_s3
 
       urls = []
       upload = Fabricate(:upload_s3)
@@ -1705,11 +1701,8 @@ describe Post do
   end
 
   def enable_secure_media_and_s3
+    setup_s3
     SiteSetting.authorized_extensions = "pdf|png|jpg|csv"
-    SiteSetting.enable_s3_uploads = true
-    SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-    SiteSetting.s3_access_key_id = "some key"
-    SiteSetting.s3_secret_access_key = "some secret key"
     SiteSetting.secure_media = true
   end
 end

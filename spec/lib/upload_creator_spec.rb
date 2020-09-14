@@ -436,11 +436,7 @@ RSpec.describe UploadCreator do
   end
 
   def enable_s3_uploads
-    SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-    SiteSetting.s3_access_key_id = "s3-access-key-id"
-    SiteSetting.s3_secret_access_key = "s3-secret-access-key"
-    SiteSetting.s3_region = 'us-west-1'
-    SiteSetting.enable_s3_uploads = true
+    setup_s3
 
     store = FileStore::S3Store.new
     s3_helper = store.instance_variable_get(:@s3_helper)

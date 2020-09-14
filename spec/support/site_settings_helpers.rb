@@ -10,4 +10,14 @@ module SiteSettingsHelpers
       self.provider = provider
     end
   end
+
+  def setup_s3
+    SiteSetting.enable_s3_uploads = true
+
+    SiteSetting.s3_region = 'us-west-1'
+    SiteSetting.s3_upload_bucket = "s3-upload-bucket"
+
+    SiteSetting.s3_access_key_id = "some key"
+    SiteSetting.s3_secret_access_key = "some secrets3_region key"
+  end
 end

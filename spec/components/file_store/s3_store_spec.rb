@@ -14,11 +14,9 @@ describe FileStore::S3Store do
   fab!(:optimized_image) { Fabricate(:optimized_image) }
   let(:optimized_image_file) { file_from_fixtures("logo.png") }
 
-  before(:each) do
-    SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-    SiteSetting.s3_access_key_id = "s3-access-key-id"
-    SiteSetting.s3_secret_access_key = "s3-secret-access-key"
-    SiteSetting.enable_s3_uploads = true
+  before do
+    setup_s3
+    SiteSetting.s3_region = 'us-west-1'
   end
 
   shared_context 's3 helpers' do
@@ -31,10 +29,6 @@ describe FileStore::S3Store do
     let(:resource) { Aws::S3::Resource.new(client: client) }
     let(:s3_bucket) { resource.bucket("s3-upload-bucket") }
     let(:s3_helper) { store.instance_variable_get(:@s3_helper) }
-
-    before do
-      SiteSetting.s3_region = 'us-west-1'
-    end
   end
 
   context 'uploading to s3' do
@@ -309,17 +303,17 @@ describe FileStore::S3Store do
     end
 
     it "doesn't crash if URL contains non-ascii characters" do
-      expect(store.has_been_uploaded?("//s3-upload-bucket.s3.dualstack.us-east-1.amazonaws.com/漢1337.png")).to eq(true)
+      expect(store.has_been_uploaded?("//s3-upload-bucket.s3.dualstack.us-west-1.amazonaws.com/漢1337.png")).to eq(true)
       expect(store.has_been_uploaded?("//s3-upload-bucket.s3.amazonaws.com/漢1337.png")).to eq(false)
     end
 
     it "identifies S3 uploads" do
-      expect(store.has_been_uploaded?("//s3-upload-bucket.s3.dualstack.us-east-1.amazonaws.com/1337.png")).to eq(true)
+      expect(store.has_been_uploaded?("//s3-upload-bucket.s3.dualstack.us-west-1.amazonaws.com/1337.png")).to eq(true)
     end
 
     it "does not match other s3 urls" do
       expect(store.has_been_uploaded?("//s3-upload-bucket.s3.amazonaws.com/1337.png")).to eq(false)
-      expect(store.has_been_uploaded?("//s3-upload-bucket.s3-us-east-1.amazonaws.com/1337.png")).to eq(false)
+      expect(store.has_been_uploaded?("//s3-upload-bucket.s3-us-west-1.amazonaws.com/1337.png")).to eq(false)
       expect(store.has_been_uploaded?("//s3.amazonaws.com/s3-upload-bucket/1337.png")).to eq(false)
       expect(store.has_been_uploaded?("//s4_upload_bucket.s3.amazonaws.com/1337.png")).to eq(false)
     end
@@ -328,7 +322,7 @@ describe FileStore::S3Store do
 
   describe ".absolute_base_url" do
     it "returns a lowercase schemaless absolute url" do
-      expect(store.absolute_base_url).to eq("//s3-upload-bucket.s3.dualstack.us-east-1.amazonaws.com")
+      expect(store.absolute_base_url).to eq("//s3-upload-bucket.s3.dualstack.us-west-1.amazonaws.com")
     end
 
     it "uses the proper endpoint" do
@@ -411,7 +405,6 @@ describe FileStore::S3Store do
   end
 
   describe '.cdn_url' do
-
     it 'supports subfolder' do
       SiteSetting.s3_upload_bucket = 's3-upload-bucket/livechat'
       SiteSetting.s3_cdn_url = 'https://rainbow.com'
@@ -420,7 +413,7 @@ describe FileStore::S3Store do
       # subfolder should not leak into uploads
       set_subfolder "/community"
 
-      url = "//s3-upload-bucket.s3.dualstack.us-east-1.amazonaws.com/livechat/original/gif.png"
+      url = "//s3-upload-bucket.s3.dualstack.us-west-1.amazonaws.com/livechat/original/gif.png"
 
       expect(store.cdn_url(url)).to eq("https://rainbow.com/original/gif.png")
     end

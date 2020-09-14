@@ -302,17 +302,13 @@ RSpec.describe "tasks/uploads" do
   end
 
   def enable_s3_uploads(uploads)
-    SiteSetting.enable_s3_uploads = true
-    SiteSetting.s3_upload_bucket = "s3-upload-bucket"
-    SiteSetting.s3_access_key_id = "some key"
-    SiteSetting.s3_secret_access_key = "some secrets3_region key"
-
-    stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/")
+    setup_s3
+    stub_request(:head, "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/")
 
     uploads.each do |upload|
       stub_request(
         :put,
-        "https://#{SiteSetting.s3_upload_bucket}.s3.amazonaws.com/original/1X/#{upload.sha1}.#{upload.extension}?acl"
+        "https://#{SiteSetting.s3_upload_bucket}.s3.#{SiteSetting.s3_region}.amazonaws.com/original/1X/#{upload.sha1}.#{upload.extension}?acl"
       )
     end
   end
