@@ -164,7 +164,11 @@ describe Post do
     end
 
     context "when secure media is enabled" do
-      before { enable_secure_media_and_s3 }
+      before do
+        setup_s3
+        SiteSetting.authorized_extensions = "pdf|png|jpg|csv"
+        SiteSetting.secure_media = true
+      end
 
       context "if login_required" do
         before { SiteSetting.login_required = true }
@@ -1426,7 +1430,11 @@ describe Post do
       end
 
       context "when secure media is enabled" do
-        before { enable_secure_media_and_s3 }
+        before do
+          setup_s3
+        SiteSetting.authorized_extensions = "pdf|png|jpg|csv"
+        SiteSetting.secure_media = true
+        end
 
         it "sets the access_control_post_id on uploads in the post that don't already have the value set" do
           other_post = Fabricate(:post)
@@ -1464,7 +1472,10 @@ describe Post do
       end
 
       before do
-        enable_secure_media_and_s3
+        setup_s3
+        SiteSetting.authorized_extensions = "pdf|png|jpg|csv"
+        SiteSetting.secure_media = true
+
         attachment_upload.update!(original_filename: "hello.csv")
 
         stub_request(
@@ -1641,7 +1652,10 @@ describe Post do
     end
 
     it "correctly identifies secure uploads" do
-      enable_secure_media_and_s3
+      setup_s3
+      SiteSetting.authorized_extensions = "pdf|png|jpg|csv"
+      SiteSetting.secure_media = true
+
       upload1 = Fabricate(:upload_s3, secure: true)
       upload2 = Fabricate(:upload_s3, secure: true)
 
@@ -1696,11 +1710,5 @@ describe Post do
       post.each_upload_url { |src, _, _| urls << src }
       expect(urls).to be_empty
     end
-  end
-
-  def enable_secure_media_and_s3
-    setup_s3
-    SiteSetting.authorized_extensions = "pdf|png|jpg|csv"
-    SiteSetting.secure_media = true
   end
 end
